@@ -25,7 +25,16 @@ Write-Host "Done building." -ForegroundColor "Green"
 if ($RunTests) {
     if ($StartServers) {
         Write-Host "Starting all servers for testing: $project (all frameworks)" -ForegroundColor "Magenta"
-        & .\RedisConfigs\start-all.cmd
+        if([environment]::OSVersion.platform -eq "unix") {
+            $CWD = [Environment]::CurrentDirectory
+            Push-Location "$PWD/tests/RedisConfigs"
+            [Environment]::CurrentDirectory = "$PWD"
+            & sh ./start-all.sh
+            Pop-Location
+            [Environment]::CurrentDirectory = $CWD
+        } else {
+            & .\RedisConfigs\start-all.cmd
+        }
         Write-Host "Servers Started." -ForegroundColor "Green"
     }
     Write-Host "Running tests: Build.csproj traversal (all frameworks)" -ForegroundColor "Magenta"
